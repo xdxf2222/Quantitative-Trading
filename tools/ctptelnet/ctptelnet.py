@@ -8,7 +8,7 @@ last modify: 2024/5/2
 import sys
 import threading
 from openctp_ctp import tdapi
-#import thosttraderapi as tdapi
+# import thosttraderapi as tdapi
 
 class CTPTelnet(tdapi.CThostFtdcTraderSpi):
     def __init__(self, host, broker, user, password, appid, authcode):
@@ -95,10 +95,11 @@ class CTPTelnet(tdapi.CThostFtdcTraderSpi):
         req.InstrumentID = InstrumentID
         self.api.ReqQryTrade(req, 0)
 
-    def QryCommissionRate(self, InstrumentID):
+    def QryCommissionRate(self, ExchangeID, InstrumentID):
         req = tdapi.CThostFtdcQryInstrumentCommissionRateField()
         req.BrokerID = self.broker
         req.InvestorID = self.user
+        req.ExchangeID = ExchangeID
         req.InstrumentID = InstrumentID
         self.api.ReqQryInstrumentCommissionRate(req, 0)
 
@@ -116,6 +117,14 @@ class CTPTelnet(tdapi.CThostFtdcTraderSpi):
         req.InvestorID = self.user
         req.InstrumentID = InstrumentID
         self.api.ReqQryInstrumentOrderCommRate(req, 0)
+
+    def QryOptionInstrCommRate(self, ExchangeID, InstrumentID):
+        req = tdapi.CThostFtdcQryOptionInstrCommRateField()
+        req.BrokerID = self.broker
+        req.InvestorID = self.user
+        req.ExchangeID = ExchangeID
+        req.InstrumentID = InstrumentID
+        self.api.ReqQryOptionInstrCommRate(req, 0)
 
     def QryTradingCode(self):
         req = tdapi.CThostFtdcQryTradingCodeField()
@@ -739,6 +748,30 @@ class CTPTelnet(tdapi.CThostFtdcTraderSpi):
                   )
         if bIsLast == True:
             print("Completed.")
+
+    def OnRspQryOptionInstrCommRate(self, pOptionInstrCommRate: "CThostFtdcOptionInstrCommRateField",
+                                         pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
+            print(f'OnRspQryOptionInstrCommRate failed: {pRspInfo.ErrorMsg}')
+            exit(-1)
+        if pOptionInstrCommRate is not None:
+            print(f"OnRspQryOptionInstrCommRate:"
+                  f"ExchangeID={pOptionInstrCommRate.ExchangeID} "
+                  f"InstrumentID={pOptionInstrCommRate.InstrumentID} "
+                  f"InvestorRange={pOptionInstrCommRate.InvestorRange} "
+                  f"InvestorID={pOptionInstrCommRate.InvestorID} "
+                  f"OpenRatioByMoney={pOptionInstrCommRate.OpenRatioByMoney} "
+                  f"OpenRatioByVolume={pOptionInstrCommRate.OpenRatioByVolume} "
+                  f"CloseRatioByMoney={pOptionInstrCommRate.CloseRatioByMoney} "
+                  f"CloseRatioByVolume={pOptionInstrCommRate.CloseRatioByVolume} "
+                  f"CloseTodayRatioByMoney={pOptionInstrCommRate.CloseTodayRatioByMoney} "
+                  f"CloseTodayRatioByVolume={pOptionInstrCommRate.CloseTodayRatioByVolume} "
+                  f"StrikeRatioByMoney={pOptionInstrCommRate.StrikeRatioByMoney} "
+                  f"StrikeRatioByVolume={pOptionInstrCommRate.StrikeRatioByVolume} "
+                  )
+        if bIsLast == True:
+            print("Completed.")
+
     def OnRspQryTradingCode(self, pTradingCode: "CThostFtdcTradingCodeField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryTradingCode failed: {pRspInfo.ErrorMsg}')
@@ -787,6 +820,7 @@ def print_commands():
     print("{}: query CommissionRate".format(command_query_CommissionRate))
     print("{}: query MarginRate".format(command_query_MarginRate))
     print("{}: query OrderCommRate".format(command_query_OrderCommRate))
+    print("{}: query OptionInstrCommRate".format(command_query_OptionInstrCommRate))
     print("{}: query investor".format(command_query_investor))
     print("{}: query tradingcode".format(command_query_tradingcode))
     print("{}: query settlement".format(command_query_settlement))
@@ -844,6 +878,8 @@ if __name__ == '__main__':
     i = i + 1
     command_query_OrderCommRate = str(i)
     i = i + 1
+    command_query_OptionInstrCommRate = str(i)
+    i = i + 1
     command_query_investor = str(i)
     i = i + 1
     command_query_tradingcode = str(i)
@@ -891,8 +927,9 @@ if __name__ == '__main__':
         elif command == command_query_account:
             ctptelnet.QryAccount()
         elif command == command_query_CommissionRate:
+            ExchangeID = input("ExchangeID: (Default:All)")
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryCommissionRate(InstrumentID)
+            ctptelnet.QryCommissionRate(ExchangeID, InstrumentID)
         elif command == command_query_MarginRate:
             ExchangeID = input("ExchangeID: (Default:All)")
             InstrumentID = input("InstrumentID:(Default:All)")
@@ -900,6 +937,10 @@ if __name__ == '__main__':
         elif command == command_query_OrderCommRate:
             InstrumentID = input("InstrumentID:(Default:All)")
             ctptelnet.QryOrderCommRate(InstrumentID)
+        elif command == command_query_OptionInstrCommRate:
+            ExchangeID = input("ExchangeID: (Default:All)")
+            InstrumentID = input("InstrumentID:(Default:All)")
+            ctptelnet.QryOptionInstrCommRate(ExchangeID, InstrumentID)
         elif command == command_query_investor:
             ctptelnet.QryInvestor()
         elif command == command_query_tradingcode:
