@@ -243,7 +243,8 @@ public:
 	void OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommissionRateField* pInstrumentCommissionRate, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pInstrumentCommissionRate)
-			printf("OnRspQryInstrumentCommissionRate:ExchangeID:%s,InstrumentID:%s,OpenRatioByMoney:%lf,CloseRatioByMoney:%lf,CloseTodayRatioByMoney:%lf,OpenRatioByVolume:%lf,CloseRatioByVolume:%lf,CloseTodayRatioByVolume:%lf\n", 
+			printf("OnRspQryInstrumentCommissionRate:BrokerID:%s,InvestorID:%s,InvestorRange:%c,ExchangeID:%s,InstrumentID:%s,OpenRatioByMoney:%lf,CloseRatioByMoney:%lf,CloseTodayRatioByMoney:%lf,OpenRatioByVolume:%lf,CloseRatioByVolume:%lf,CloseTodayRatioByVolume:%lf\n",
+				pInstrumentCommissionRate->BrokerID, pInstrumentCommissionRate->InvestorID, pInstrumentCommissionRate->InvestorRange,
 				pInstrumentCommissionRate->ExchangeID, pInstrumentCommissionRate->InstrumentID,
 				pInstrumentCommissionRate->OpenRatioByMoney, pInstrumentCommissionRate->CloseRatioByMoney, pInstrumentCommissionRate->CloseTodayRatioByMoney,
 				pInstrumentCommissionRate->OpenRatioByVolume, pInstrumentCommissionRate->CloseRatioByVolume, pInstrumentCommissionRate->CloseTodayRatioByVolume);
@@ -257,9 +258,10 @@ public:
 	void OnRspQryInstrumentOrderCommRate(CThostFtdcInstrumentOrderCommRateField* pInstrumentOrderCommRate, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pInstrumentOrderCommRate)
-			printf("OnRspQryInstrumentOrderCommRate:ExchangeID:%s,InstrumentID:%s,OrderCommByVolume:%lf,OrderActionCommByVolume:%lf\n",
+			printf("OnRspQryInstrumentOrderCommRate:BrokerID:%s,InvestorID:%s,InvestorRange:%c,ExchangeID:%s,InstrumentID:%s,OrderCommByVolume:%lf,OrderActionCommByVolume:%lf,HedgeFlag:%c\n",
+				pInstrumentOrderCommRate->BrokerID, pInstrumentOrderCommRate->InvestorID, pInstrumentOrderCommRate->InvestorRange,
 				pInstrumentOrderCommRate->ExchangeID, pInstrumentOrderCommRate->InstrumentID,
-				pInstrumentOrderCommRate->OrderCommByVolume, pInstrumentOrderCommRate->OrderActionCommByVolume);
+				pInstrumentOrderCommRate->OrderCommByVolume, pInstrumentOrderCommRate->OrderActionCommByVolume, pInstrumentOrderCommRate->HedgeFlag);
 
 		if (bIsLast) {
 			_semaphore.signal();
@@ -270,10 +272,11 @@ public:
 	void OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField* pInstrumentMarginRate, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pInstrumentMarginRate)
-			printf("OnRspQryInstrumentMarginRate:ExchangeID:%s,InstrumentID:%s,LongMarginRatioByMoney:%lf,LongMarginRatioByVolume:%lf,ShortMarginRatioByMoney:%lf,ShortMarginRatioByVolume:%lf\n",
+			printf("OnRspQryInstrumentMarginRate:BrokerID:%s,InvestorID:%s,InvestorRange:%c,ExchangeID:%s,InstrumentID:%s,LongMarginRatioByMoney:%lf,LongMarginRatioByVolume:%lf,ShortMarginRatioByMoney:%lf,ShortMarginRatioByVolume:%lf,HedgeFlag:%c\n",
+				pInstrumentMarginRate->BrokerID, pInstrumentMarginRate->InvestorID, pInstrumentMarginRate->InvestorRange,
 				pInstrumentMarginRate->ExchangeID, pInstrumentMarginRate->InstrumentID,
 				pInstrumentMarginRate->LongMarginRatioByMoney, pInstrumentMarginRate->LongMarginRatioByVolume, pInstrumentMarginRate->ShortMarginRatioByMoney,
-				pInstrumentMarginRate->ShortMarginRatioByVolume);
+				pInstrumentMarginRate->ShortMarginRatioByVolume,pInstrumentMarginRate->HedgeFlag);
 
 		if (bIsLast) {
 			_semaphore.signal();
@@ -284,10 +287,26 @@ public:
 	void OnRspQryExchangeMarginRate(CThostFtdcExchangeMarginRateField* pExchangeMarginRate, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pExchangeMarginRate)
-			printf("OnRspQryExchangeMarginRate:ExchangeID:%s,InstrumentID:%s,LongMarginRatioByMoney:%lf,LongMarginRatioByVolume:%lf,ShortMarginRatioByMoney:%lf,ShortMarginRatioByVolume:%lf\n",
+			printf("OnRspQryExchangeMarginRate:ExchangeID:%s,InstrumentID:%s,LongMarginRatioByMoney:%lf,LongMarginRatioByVolume:%lf,ShortMarginRatioByMoney:%lf,ShortMarginRatioByVolume:%lf,HedgeFlag:%c\n",
 				pExchangeMarginRate->ExchangeID, pExchangeMarginRate->InstrumentID,
 				pExchangeMarginRate->LongMarginRatioByMoney, pExchangeMarginRate->LongMarginRatioByVolume, pExchangeMarginRate->ShortMarginRatioByMoney,
-				pExchangeMarginRate->ShortMarginRatioByVolume);
+				pExchangeMarginRate->ShortMarginRatioByVolume,pExchangeMarginRate->HedgeFlag);
+
+		if (bIsLast) {
+			_semaphore.signal();
+		}
+	}
+
+	///请求查询期权合约手续费响应
+	void OnRspQryOptionInstrCommRate(CThostFtdcOptionInstrCommRateField* pOptionInstrCommRate, CThostFtdcRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	{
+		if (pOptionInstrCommRate)
+			printf("OnRspQryOptionInstrCommRate:BrokerID:%s,InvestorID:%s,InvestorRange:%c,ExchangeID:%s,InstrumentID:%s,OpenRatioByMoney:%lf,CloseRatioByMoney:%lf,CloseTodayRatioByMoney:%lf,OpenRatioByVolume:%lf,CloseRatioByVolume:%lf,CloseTodayRatioByVolume:%lf,StrikeRatioByMoney:%lf,StrikeRatioByVolume:%lf\n",
+				pOptionInstrCommRate->BrokerID, pOptionInstrCommRate->InvestorID, pOptionInstrCommRate->InvestorRange,
+				pOptionInstrCommRate->ExchangeID, pOptionInstrCommRate->InstrumentID,
+				pOptionInstrCommRate->OpenRatioByMoney, pOptionInstrCommRate->CloseRatioByMoney, pOptionInstrCommRate->CloseTodayRatioByMoney,
+				pOptionInstrCommRate->OpenRatioByVolume, pOptionInstrCommRate->CloseRatioByVolume, pOptionInstrCommRate->CloseTodayRatioByVolume,
+				pOptionInstrCommRate->StrikeRatioByMoney, pOptionInstrCommRate->StrikeRatioByVolume);
 
 		if (bIsLast) {
 			_semaphore.signal();
@@ -501,7 +520,7 @@ int main(int argc, char* argv[])
 	strncpy(QryInstrumentCommissionRate.BrokerID, broker.c_str(), sizeof(QryInstrumentCommissionRate.BrokerID) - 1);
 	strncpy(QryInstrumentCommissionRate.InvestorID, user.c_str(), sizeof(QryInstrumentCommissionRate.InvestorID) - 1);
 	strncpy(QryInstrumentCommissionRate.ExchangeID, "SHFE", sizeof(QryInstrumentCommissionRate.ExchangeID) - 1);
-	strncpy(QryInstrumentCommissionRate.InstrumentID, "au2203", sizeof(QryInstrumentCommissionRate) - 1);
+	strncpy(QryInstrumentCommissionRate.InstrumentID, "au2412", sizeof(QryInstrumentCommissionRate) - 1);
 	Spi.m_pUserApi->ReqQryInstrumentCommissionRate(&QryInstrumentCommissionRate, 0);
 	_semaphore.wait();
 
@@ -512,7 +531,8 @@ int main(int argc, char* argv[])
 	strncpy(QryInstrumentCommissionRate.BrokerID, broker.c_str(), sizeof(QryInstrumentCommissionRate.BrokerID) - 1);
 	strncpy(QryInstrumentCommissionRate.InvestorID, user.c_str(), sizeof(QryInstrumentCommissionRate.InvestorID) - 1);
 	strncpy(QryInstrumentMarginRate.ExchangeID, "SHFE", sizeof(QryInstrumentMarginRate.ExchangeID) - 1);
-	strncpy(QryInstrumentMarginRate.InstrumentID, "au2203", sizeof(QryInstrumentMarginRate.InstrumentID) - 1);
+	strncpy(QryInstrumentMarginRate.InstrumentID, "au2412", sizeof(QryInstrumentMarginRate.InstrumentID) - 1);
+	QryInstrumentMarginRate.HedgeFlag = THOST_FTDC_HF_Speculation;
 	Spi.m_pUserApi->ReqQryInstrumentMarginRate(&QryInstrumentMarginRate, 0);
 	_semaphore.wait();
 
@@ -522,8 +542,9 @@ int main(int argc, char* argv[])
 	CThostFtdcQryExchangeMarginRateField QryExchangeMarginRate = { 0 };
 	strncpy(QryInstrumentCommissionRate.BrokerID, broker.c_str(), sizeof(QryInstrumentCommissionRate.BrokerID) - 1);
 	strncpy(QryInstrumentCommissionRate.InvestorID, user.c_str(), sizeof(QryInstrumentCommissionRate.InvestorID) - 1);
-	//strncpy(QryExchangeMarginRate.ExchangeID, "SHFE", sizeof(QryExchangeMarginRate.ExchangeID) - 1);
-	//strncpy(QryExchangeMarginRate.InstrumentID, "au2203", sizeof(QryExchangeMarginRate.InstrumentID) - 1);
+	strncpy(QryExchangeMarginRate.ExchangeID, "SHFE", sizeof(QryExchangeMarginRate.ExchangeID) - 1);
+	strncpy(QryExchangeMarginRate.InstrumentID, "au2412", sizeof(QryExchangeMarginRate.InstrumentID) - 1);
+	QryExchangeMarginRate.HedgeFlag = THOST_FTDC_HF_Speculation;
 	Spi.m_pUserApi->ReqQryExchangeMarginRate(&QryExchangeMarginRate, 0);
 	_semaphore.wait();
 
@@ -540,8 +561,19 @@ int main(int argc, char* argv[])
 	CThostFtdcQryInstrumentOrderCommRateField QryInstrumentOrderCommRate = { 0 };
 	strncpy(QryInstrumentOrderCommRate.BrokerID, broker.c_str(), sizeof(QryInstrumentOrderCommRate.BrokerID) - 1);
 	strncpy(QryInstrumentOrderCommRate.InvestorID, user.c_str(), sizeof(QryInstrumentOrderCommRate.InvestorID) - 1);
-	strncpy(QryInstrumentOrderCommRate.InstrumentID, "IF2301", sizeof(QryInstrumentOrderCommRate) - 1);
+	strncpy(QryInstrumentOrderCommRate.InstrumentID, "IF2412", sizeof(QryInstrumentOrderCommRate.InstrumentID) - 1);
 	Spi.m_pUserApi->ReqQryInstrumentOrderCommRate(&QryInstrumentOrderCommRate, 0);
+	_semaphore.wait();
+
+	// 查询投资者期权合约手续费率
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	printf("查询投资者期权合约手续费率 ...\n");
+	CThostFtdcQryOptionInstrCommRateField QryOptionInstrCommRate = { 0 };
+	strncpy(QryOptionInstrCommRate.BrokerID, broker.c_str(), sizeof(QryOptionInstrCommRate.BrokerID) - 1);
+	strncpy(QryOptionInstrCommRate.InvestorID, user.c_str(), sizeof(QryOptionInstrCommRate.InvestorID) - 1);
+	strncpy(QryOptionInstrCommRate.ExchangeID, "SSE", sizeof(QryOptionInstrCommRate.ExchangeID) - 1);
+	strncpy(QryOptionInstrCommRate.InstrumentID, "10007304", sizeof(QryOptionInstrCommRate.InstrumentID) - 1);
+	Spi.m_pUserApi->ReqQryOptionInstrCommRate(&QryOptionInstrCommRate, 0);
 	_semaphore.wait();
 
 	// 查询行情
