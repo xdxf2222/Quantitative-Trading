@@ -2,7 +2,7 @@
 
 """
 author: krenx@openctp.
-last modify: 2024/5/2
+last modify: 2024/7/13
 """
 
 import sys
@@ -10,7 +10,7 @@ import threading
 from openctp_ctp import tdapi
 # import thosttraderapi as tdapi
 
-class CTPTelnet(tdapi.CThostFtdcTraderSpi):
+class CTPCommand(tdapi.CThostFtdcTraderSpi):
     def __init__(self, host, broker, user, password, appid, authcode):
         self.broker = broker
         self.user = user
@@ -862,7 +862,7 @@ if __name__ == '__main__':
     password = sys.argv[4]
     appid = sys.argv[5]
     authcode = sys.argv[6]
-    ctptelnet = CTPTelnet(host, broker, user, password, appid, authcode)
+    ctptelnet = CTPCommand(host, broker, user, password, appid, authcode)
     ctptelnet.Run()
 
     # wait for login ok.

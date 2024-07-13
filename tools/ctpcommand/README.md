@@ -1,13 +1,15 @@
-# ctptelnet工具是一个互式命令行工具，像telnet一样通过命令与ctp柜台进行交互，支持查询合约、资金、持仓、订单等
+# ctpcommand工具是一个互式命令行工具，像telnet一样通过命令与ctp柜台进行交互，支持查询合约、资金、持仓、订单等
 
 # 用法
-python ctptelnet.py host broker user password appid authcode
 
-例：python ctptelnet.py tcp://180.168.146.187:10130 9999 000001 888888 simnow_client_test 0000000000000000
+python ctpcommand.py host broker user password appid authcode
+
+例：python ctpcommand.py tcp://180.168.146.187:10130 9999 000001 888888 simnow_client_test 0000000000000000
 
 # 效果
+
 ```commandline
-> python ctptelnet.py tcp://180.168.146.187:10130 9999 058762 123456 simnow_client_test 0000000000000000
+> python ctpcommand.py tcp://180.168.146.187:10130 9999 058762 123456 simnow_client_test 0000000000000000
 OnFrontConnected
 Authenticate succeed.
 Login succeed. TradingDay: 20240430
