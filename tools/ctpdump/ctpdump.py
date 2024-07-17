@@ -9,8 +9,8 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, asdict
-from openctp_ctp import tdapi
-#import thosttraderapi as tdapi
+#from openctp_ctp import tdapi
+import thosttraderapi as tdapi
 
 
 def adjust_price(price: float) -> float:
@@ -571,7 +571,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryExchange(self, pExchange: "CThostFtdcExchangeField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "None":
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f"OnRspQryExchange failed: {pRspInfo.ErrorMsg}")
-            exit(-1)
+            # exit(-1)
         # print(f"OnRspQryExchange:{pExchange.ExchangeID}, {pExchange.ExchangeName}")
 
         if pExchange:
@@ -584,7 +584,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryProduct(self, pProduct: "CThostFtdcProductField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "None":
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f"OnRspQryProduct failed: {pRspInfo.ErrorMsg}")
-            exit(-1)
+            # exit(-1)
         # print(f"OnRspQryProduct:{pProduct.ProductID}, {pProduct.ProductName}, {pProduct.ExchangeID}")
 
         if pProduct:
@@ -604,7 +604,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     ) -> "None":
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f"OnRspQryInstrument failed: {pRspInfo.ErrorMsg}")
-            exit(-1)
+            # exit(-1)
         # print(f"OnRspQryInstrument:{pInstrument.InstrumentID}, {pInstrument.InstrumentName}, ExchangeID:{pInstrument.ExchangeID}")
 
         if pInstrument:
@@ -621,7 +621,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryInvestorPosition(self, pInvestorPosition, pRspInfo, nRequestID, bIsLast):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInvestorPosition failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
         
         if pInvestorPosition:
             position = convert_field(pInvestorPosition, InvestorPositionField)
@@ -632,7 +632,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryInvestorPositionDetail(self, pInvestorPositionDetail: "CThostFtdcInvestorPositionDetailField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInvestorPositionDetail failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
 
         if pInvestorPositionDetail:
             position_detail = convert_field(pInvestorPositionDetail, InvestorPositionDetailField)
@@ -643,7 +643,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryOrder(self, pOrder, pRspInfo, nRequestID, bIsLast):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryOrder failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
         
         if pOrder:
             order = convert_field(pOrder, OrderField)
@@ -654,7 +654,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryTrade(self, pTrade, pRspInfo, nRequestID, bIsLast):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryTrade failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
             
         if pTrade:
             trade = convert_field(pTrade, TradeField)
@@ -665,7 +665,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryTradingAccount(self, pTradingAccount, pRspInfo, nRequestID, bIsLast):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryTradingAccount failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
         
         if pTradingAccount:
             account = convert_field(pTradingAccount, TradingAccountField)
@@ -676,7 +676,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
     def OnRspQryDepthMarketData(self, pDepthMarketData, pRspInfo, nRequestID, bIsLast):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryDepthMarketData failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
         if pDepthMarketData:
             data = convert_field(pDepthMarketData, DepthMarketDataField)
             data.PreSettlementPrice = adjust_price(data.PreSettlementPrice)
@@ -710,7 +710,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
                                          pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInstrumentCommissionRate failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
         if pInstrumentCommissionRate:
             CommissionRate = convert_field(pInstrumentCommissionRate, InstrumentCommissionRateField)
             self.CommissionRates.append(CommissionRate)
@@ -721,7 +721,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
                                      pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInstrumentMarginRate failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
         if pInstrumentMarginRate:
             MarginRate = convert_field(pInstrumentMarginRate, InstrumentMarginRateField)
             self.MarginRates.append(MarginRate)
@@ -732,7 +732,7 @@ class CTPDump(tdapi.CThostFtdcTraderSpi):
                                         pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInstrumentOrderCommRate failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            # exit(-1)
         if pInstrumentOrderCommRate:
             OrderCommRate = convert_field(pInstrumentOrderCommRate, InstrumentOrderCommRateField)
             self.OrderCommRates.append(OrderCommRate)
