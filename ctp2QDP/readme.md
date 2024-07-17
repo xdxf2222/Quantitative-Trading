@@ -29,6 +29,7 @@ openctp开发的CTPAPI转接口，CTP程序只需更换ctp的交易和行情dll�
 ## MiniTrader接入QDP柜台
 ![image](https://github.com/user-attachments/assets/ce69ccd5-8be8-44da-b89f-e68f9c47e53b)
 
+- [发布QDP极速柜台CTPAPI](https://mp.weixin.qq.com/s?__biz=Mzk0ODI0NDE2Ng==&mid=2247485377&idx=1&sn=5149412546fbb3d6acb96e4154adcf53&chksm=c36bdc68f41c557e3c7caacaf662b9983c37f9f1004cb9dda2b3da3c009cf7b947c46260329a&token=2114132773&lang=zh_CN#rd)
 - [openctp的产品与服务](https://zhuanlan.zhihu.com/p/683874612)
 - [如何使用CTP开放平台提供的各项能力](https://mp.weixin.qq.com/s?__biz=Mzk0ODI0NDE2Ng==&mid=2247484094&idx=1&sn=97bd791622333886260bf767bea40db1&chksm=c36bd917f41c50016b676b5f5b11f899aea889cd9b10e6724c7fee0ad443f31351f87ff5a4d2&token=1437331958&lang=zh_CN#rd)
 - [发布量投QDP极速柜台接口demo](https://mp.weixin.qq.com/s?__biz=Mzk0ODI0NDE2Ng==&mid=2247485329&idx=1&sn=913785be3306908909ce3a160abfb18c&chksm=c36bdc38f41c552e35ba6c39e4b1addb6f4aee4ece068f697a11b1c5f264cc30f7bab4c516ed&token=2114132773&lang=zh_CN#rd)
