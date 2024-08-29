@@ -23,6 +23,8 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
         self.SessionID = 0
         self.OrderRef = 0
 
+        self.Accountregister = tdapi.CThostFtdcAccountregisterField()
+
         tdapi.CThostFtdcTraderSpi.__init__(self)
         self.api: tdapi.CThostFtdcTraderApi = tdapi.CThostFtdcTraderApi.CreateFtdcTraderApi()
         self.api.RegisterSpi(self)
@@ -183,6 +185,38 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
         req.OrderRef = OrderRef
         req.ActionFlag = tdapi.THOST_FTDC_AF_Delete
         self.api.ReqOrderAction(req, 0)
+
+    def QryContractBank(self):
+        req = tdapi.CThostFtdcQryContractBankField()
+        self.api.ReqQryContractBank(req, 0)
+
+    def QryTransferSerial(self):
+        req = tdapi.CThostFtdcQryTransferSerialField()
+        self.api.ReqQryTransferSerial(req, 0)
+
+    def QryAccountRegister(self):
+        req = tdapi.CThostFtdcQryAccountregisterField()
+        self.api.ReqQryAccountregister(req, 0)
+
+    def QueryBankAccount(self, Password):
+        if self.Accountregister.AccountID == "":
+            print("please Query AccountRegister first.")
+            return
+
+        req = tdapi.CThostFtdcReqQueryAccountField()
+        req.TradeCode = "204002"
+        req.AccountID = self.Accountregister.AccountID
+        req.BankID = self.Accountregister.BankID
+        req.BankBranchID = self.Accountregister.BankBranchID
+        req.BankAccount = self.Accountregister.BankAccount
+        req.BankAccType = self.Accountregister.BankAccType
+        req.BrokerID = self.Accountregister.BrokerID
+        req.BrokerBranchID = self.Accountregister.BrokerBranchID
+        req.IdCardType = self.Accountregister.IdCardType
+        req.IdentifiedCardNo = self.Accountregister.IdentifiedCardNo
+        req.CurrencyID = self.Accountregister.CurrencyID
+        req.Password = Password
+        self.api.ReqQueryBankAccountMoneyByFuture(req, 0)
 
     def OnFrontConnected(self) -> "void":
         print("OnFrontConnected")
@@ -708,7 +742,7 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
                                          pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInstrumentCommissionRate failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            return
         if pInstrumentCommissionRate is not None:
             print(f"OnRspQryInstrumentCommissionRate:"
                   f"ExchangeID={pInstrumentCommissionRate.ExchangeID} "
@@ -729,7 +763,7 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
                                      pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInstrumentMarginRate failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            return
         if pInstrumentMarginRate is not None:
             print(f"OnRspQryInstrumentMarginRate:"
                   f"ExchangeID={pInstrumentMarginRate.ExchangeID} "
@@ -750,7 +784,7 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
                                         pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryInstrumentOrderCommRate failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            return
         if pInstrumentOrderCommRate is not None:
             print(f"OnRspQryInstrumentOrderCommRate:"
                   f"ExchangeID={pInstrumentOrderCommRate.ExchangeID} "
@@ -768,7 +802,7 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
                                          pRspInfo: tdapi.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryOptionInstrCommRate failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            return
         if pOptionInstrCommRate is not None:
             print(f"OnRspQryOptionInstrCommRate:"
                   f"ExchangeID={pOptionInstrCommRate.ExchangeID} "
@@ -790,7 +824,7 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
     def OnRspQryTradingCode(self, pTradingCode: "CThostFtdcTradingCodeField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQryTradingCode failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            return
         if pTradingCode is not None:
             print(f"OnRspQryTradingCode:"
                   f"BrokerID={pTradingCode.BrokerID} "
@@ -803,7 +837,7 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
     def OnRspQrySettlementInfo(self, pSettlementInfo: "CThostFtdcSettlementInfoField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
         if pRspInfo is not None and pRspInfo.ErrorID != 0:
             print(f'OnRspQrySettlementInfo failed: {pRspInfo.ErrorMsg}')
-            exit(-1)
+            return
         if pSettlementInfo is not None:
             # print(f"OnRspQrySettlementInfo:TradingDay={pSettlementInfo.TradingDay},InvestorID={pSettlementInfo.InvestorID},CurrencyID={pSettlementInfo.CurrencyID},Content={pSettlementInfo.Content}")
             print(pSettlementInfo.Content)
@@ -819,6 +853,257 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
               f'EnterTime={pInstrumentStatus.EnterTime} '
               f"EnterReason={pInstrumentStatus.EnterReason} "
               )
+
+    def OnRspQryTransferSerial(self, pTransferSerial: "CThostFtdcTransferSerialField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
+        r"""请求查询转帐流水响应"""
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
+            print(f'OnRspQryTransferSerial failed: {pRspInfo.ErrorMsg}')
+            return
+        if pTransferSerial is not None:
+            print(f"OnRspQryTransferSerial:"
+                  f"TradeCode={pTransferSerial.TradeCode} "
+                  f"AccountID={pTransferSerial.AccountID} "
+                  f"BankID={pTransferSerial.BankID} "
+                  f"BankAccount={pTransferSerial.BankAccount} "
+                  f"CurrencyID={pTransferSerial.CurrencyID} "
+                  f"TradeAmount={pTransferSerial.TradeAmount} "
+                  f"PlateSerial={pTransferSerial.PlateSerial} "
+                  f"TradeDate={pTransferSerial.TradeDate} "
+                  f"TradeTime={pTransferSerial.TradeTime} "
+                  f"ErrorMsg={pTransferSerial.ErrorMsg} "
+                  )
+        if bIsLast == True:
+            print("Completed.")
+
+    def OnRspQryAccountregister(self, pAccountregister: "CThostFtdcAccountregisterField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
+        r"""请求查询银期签约关系响应"""
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
+            print(f'OnRspQryAccountregister failed: {pRspInfo.ErrorMsg}')
+            return
+        if pAccountregister is not None:
+            print(f"OnRspQryAccountregister:"
+                  f"AccountID={pAccountregister.AccountID} "
+                  f"BankID={pAccountregister.BankID} "
+                  f"BankAccount={pAccountregister.BankAccount} "
+                  f"CustomerName={pAccountregister.CustomerName} "
+                  f"CurrencyID={pAccountregister.CurrencyID} "
+                  f"RegDate={pAccountregister.RegDate} "
+                  )
+            self.Accountregister.TradeDay = pAccountregister.TradeDay
+            self.Accountregister.BankID = pAccountregister.BankID
+            self.Accountregister.BankBranchID = pAccountregister.BankBranchID
+            self.Accountregister.BankAccount = pAccountregister.BankAccount
+            self.Accountregister.BrokerID = pAccountregister.BrokerID
+            self.Accountregister.BrokerBranchID = pAccountregister.BrokerBranchID
+            self.Accountregister.AccountID = pAccountregister.AccountID
+            self.Accountregister.IdCardType = pAccountregister.IdCardType
+            self.Accountregister.IdentifiedCardNo = pAccountregister.IdentifiedCardNo
+            self.Accountregister.CustomerName = pAccountregister.CustomerName
+            self.Accountregister.CurrencyID = pAccountregister.CurrencyID
+            self.Accountregister.OpenOrDestroy = pAccountregister.OpenOrDestroy
+            self.Accountregister.RegDate = pAccountregister.RegDate
+            self.Accountregister.OutDate = pAccountregister.OutDate
+            self.Accountregister.TID = pAccountregister.TID
+            self.Accountregister.CustType = pAccountregister.CustType
+            self.Accountregister.BankAccType = pAccountregister.BankAccType
+            self.Accountregister.LongCustomerName = pAccountregister.LongCustomerName
+
+        if bIsLast == True:
+            print("Completed.")
+
+    def OnRspQryContractBank(self, pContractBank: "CThostFtdcContractBankField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
+        r"""请求查询签约银行响应"""
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
+            print(f'OnRspQryContractBank failed: {pRspInfo.ErrorMsg}')
+            return
+        if pContractBank is not None:
+            print(f"OnRspQryContractBank:"
+                  f"BankID={pContractBank.BankID} "
+                  f"BankBrchID={pContractBank.BankBrchID} "
+                  f"BankName={pContractBank.BankName} "
+                  )
+        if bIsLast == True:
+            print("Completed.")
+
+    def OnRtnFromBankToFutureByBank(self, pRspTransfer: "CThostFtdcRspTransferField") -> "void":
+        r"""银行发起银行资金转期货通知"""
+        print(f"OnRtnFromBankToFutureByBank:"
+              f"TradeCode={pRspTransfer.TradeCode} "
+              f"AccountID={pRspTransfer.AccountID} "
+              f"BankID={pRspTransfer.BankID} "
+              f"BankAccount={pRspTransfer.BankAccount} "
+              f"CurrencyID={pRspTransfer.CurrencyID} "
+              f"TradeAmount={pRspTransfer.TradeAmount} "
+              f"PlateSerial={pRspTransfer.PlateSerial} "
+              f"TradeDate={pRspTransfer.TradeDate} "
+              f"TradeTime={pRspTransfer.TradeTime} "
+              f"ErrorMsg={pRspTransfer.ErrorMsg} "
+              )
+
+    def OnRtnFromFutureToBankByBank(self, pRspTransfer: "CThostFtdcRspTransferField") -> "void":
+        r"""银行发起期货资金转银行通知"""
+        print(f"OnRtnFromFutureToBankByBank:"
+              f"TradeCode={pRspTransfer.TradeCode} "
+              f"AccountID={pRspTransfer.AccountID} "
+              f"BankID={pRspTransfer.BankID} "
+              f"BankAccount={pRspTransfer.BankAccount} "
+              f"CurrencyID={pRspTransfer.CurrencyID} "
+              f"TradeAmount={pRspTransfer.TradeAmount} "
+              f"PlateSerial={pRspTransfer.PlateSerial} "
+              f"TradeDate={pRspTransfer.TradeDate} "
+              f"TradeTime={pRspTransfer.TradeTime} "
+              f"ErrorMsg={pRspTransfer.ErrorMsg} "
+              )
+
+    def OnRtnRepealFromBankToFutureByBank(self, pRspRepeal: "CThostFtdcRspRepealField") -> "void":
+        r"""银行发起冲正银行转期货通知"""
+        print(f"OnRtnRepealFromBankToFutureByBank:")
+
+    def OnRtnRepealFromFutureToBankByBank(self, pRspRepeal: "CThostFtdcRspRepealField") -> "void":
+        r"""银行发起冲正期货转银行通知"""
+        print(f"OnRtnRepealFromFutureToBankByBank:")
+
+    def OnRtnFromBankToFutureByFuture(self, pRspTransfer: "CThostFtdcRspTransferField") -> "void":
+        r"""期货发起银行资金转期货通知"""
+        print(f"OnRtnFromBankToFutureByFuture:"
+              f"TradeCode={pRspTransfer.TradeCode} "
+              f"AccountID={pRspTransfer.AccountID} "
+              f"BankID={pRspTransfer.BankID} "
+              f"BankAccount={pRspTransfer.BankAccount} "
+              f"CurrencyID={pRspTransfer.CurrencyID} "
+              f"TradeAmount={pRspTransfer.TradeAmount} "
+              f"PlateSerial={pRspTransfer.PlateSerial} "
+              f"TradeDate={pRspTransfer.TradeDate} "
+              f"TradeTime={pRspTransfer.TradeTime} "
+              f"ErrorMsg={pRspTransfer.ErrorMsg} "
+              )
+
+    def OnRtnFromFutureToBankByFuture(self, pRspTransfer: "CThostFtdcRspTransferField") -> "void":
+        r"""期货发起期货资金转银行通知"""
+        print(f"OnRtnFromFutureToBankByFuture:"
+              f"TradeCode={pRspTransfer.TradeCode} "
+              f"AccountID={pRspTransfer.AccountID} "
+              f"BankID={pRspTransfer.BankID} "
+              f"BankAccount={pRspTransfer.BankAccount} "
+              f"CurrencyID={pRspTransfer.CurrencyID} "
+              f"TradeAmount={pRspTransfer.TradeAmount} "
+              f"PlateSerial={pRspTransfer.PlateSerial} "
+              f"TradeDate={pRspTransfer.TradeDate} "
+              f"TradeTime={pRspTransfer.TradeTime} "
+              f"ErrorMsg={pRspTransfer.ErrorMsg} "
+              )
+
+    def OnRtnRepealFromBankToFutureByFutureManual(self, pRspRepeal: "CThostFtdcRspRepealField") -> "void":
+        r"""系统运行时期货端手工发起冲正银行转期货请求，银行处理完毕后报盘发回的通知"""
+        print(f"OnRtnRepealFromBankToFutureByFutureManual:")
+
+    def OnRtnRepealFromFutureToBankByFutureManual(self, pRspRepeal: "CThostFtdcRspRepealField") -> "void":
+        r"""系统运行时期货端手工发起冲正期货转银行请求，银行处理完毕后报盘发回的通知"""
+        print(f"OnRtnRepealFromFutureToBankByFutureManual:")
+
+    def OnRtnQueryBankBalanceByFuture(self, pNotifyQueryAccount: "CThostFtdcNotifyQueryAccountField") -> "void":
+        r"""期货发起查询银行余额通知"""
+        print(f"OnRtnQueryBankBalanceByFuture:"
+              f"TradeCode={pNotifyQueryAccount.TradeCode} "
+              f"AccountID={pNotifyQueryAccount.AccountID} "
+              f"BankID={pNotifyQueryAccount.BankID} "
+              f"BankAccount={pNotifyQueryAccount.BankAccount} "
+              f"CurrencyID={pNotifyQueryAccount.CurrencyID} "
+              f"BankFetchAmount={pNotifyQueryAccount.BankFetchAmount} "
+              f"PlateSerial={pNotifyQueryAccount.PlateSerial} "
+              f"TradeDate={pNotifyQueryAccount.TradeDate} "
+              f"TradeTime={pNotifyQueryAccount.TradeTime} "
+              f"ErrorMsg={pNotifyQueryAccount.ErrorMsg} "
+              )
+
+    def OnErrRtnBankToFutureByFuture(self, pReqTransfer: "CThostFtdcReqTransferField", pRspInfo: "CThostFtdcRspInfoField") -> "void":
+        r"""期货发起银行资金转期货错误回报"""
+        print(f"OnErrRtnBankToFutureByFuture:")
+
+    def OnErrRtnFutureToBankByFuture(self, pReqTransfer: "CThostFtdcReqTransferField", pRspInfo: "CThostFtdcRspInfoField") -> "void":
+        r"""期货发起期货资金转银行错误回报"""
+        print(f"OnErrRtnFutureToBankByFuture:")
+
+    def OnErrRtnRepealBankToFutureByFutureManual(self, pReqRepeal: "CThostFtdcReqRepealField", pRspInfo: "CThostFtdcRspInfoField") -> "void":
+        r"""系统运行时期货端手工发起冲正银行转期货错误回报"""
+        print(f"OnErrRtnRepealBankToFutureByFutureManual:")
+
+    def OnErrRtnRepealFutureToBankByFutureManual(self, pReqRepeal: "CThostFtdcReqRepealField", pRspInfo: "CThostFtdcRspInfoField") -> "void":
+        r"""系统运行时期货端手工发起冲正期货转银行错误回报"""
+        print(f"OnErrRtnRepealFutureToBankByFutureManual:")
+
+    def OnErrRtnQueryBankBalanceByFuture(self, pReqQueryAccount: "CThostFtdcReqQueryAccountField", pRspInfo: "CThostFtdcRspInfoField") -> "void":
+        r"""期货发起查询银行余额错误回报"""
+        print(f"OnErrRtnQueryBankBalanceByFuture:")
+
+    def OnRtnRepealFromBankToFutureByFuture(self, pRspRepeal: "CThostFtdcRspRepealField") -> "void":
+        r"""期货发起冲正银行转期货请求，银行处理完毕后报盘发回的通知"""
+        print(f"OnRtnRepealFromBankToFutureByFuture:")
+
+    def OnRtnRepealFromFutureToBankByFuture(self, pRspRepeal: "CThostFtdcRspRepealField") -> "void":
+        r"""期货发起冲正期货转银行请求，银行处理完毕后报盘发回的通知"""
+        print(f"OnRtnRepealFromFutureToBankByFuture:")
+
+    def OnRspFromBankToFutureByFuture(self, pReqTransfer: "CThostFtdcReqTransferField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
+        r"""期货发起银行资金转期货应答"""
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
+            print(f'OnRspFromBankToFutureByFuture failed: {pRspInfo.ErrorMsg}')
+            return
+        if pReqTransfer is not None:
+            print(f"OnRspFromBankToFutureByFuture:"
+                  f"TradeCode={pReqTransfer.TradeCode} "
+                  f"AccountID={pReqTransfer.AccountID} "
+                  f"BankID={pReqTransfer.BankID} "
+                  f"BankAccount={pReqTransfer.BankAccount} "
+                  f"CurrencyID={pReqTransfer.CurrencyID} "
+                  f"TradeAmount={pReqTransfer.TradeAmount} "
+                  f"PlateSerial={pReqTransfer.PlateSerial} "
+                  f"TradeDate={pReqTransfer.TradeDate} "
+                  f"TradeTime={pReqTransfer.TradeTime} "
+                  f"ErrorMsg={pReqTransfer.ErrorMsg} "
+                  )
+        if bIsLast == True:
+            print("Completed.")
+
+    def OnRspFromFutureToBankByFuture(self, pReqTransfer: "CThostFtdcReqTransferField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
+        r"""期货发起期货资金转银行应答"""
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
+            print(f'OnRspFromFutureToBankByFuture failed: {pRspInfo.ErrorMsg}')
+            return
+        if pReqTransfer is not None:
+            print(f"OnRspFromFutureToBankByFuture:"
+                  f"TradeCode={pReqTransfer.TradeCode} "
+                  f"AccountID={pReqTransfer.AccountID} "
+                  f"BankID={pReqTransfer.BankID} "
+                  f"BankAccount={pReqTransfer.BankAccount} "
+                  f"CurrencyID={pReqTransfer.CurrencyID} "
+                  f"TradeAmount={pReqTransfer.TradeAmount} "
+                  f"PlateSerial={pReqTransfer.PlateSerial} "
+                  f"TradeDate={pReqTransfer.TradeDate} "
+                  f"TradeTime={pReqTransfer.TradeTime} "
+                  f"ErrorMsg={pReqTransfer.ErrorMsg} "
+                  )
+        if bIsLast == True:
+            print("Completed.")
+
+    def OnRspQueryBankAccountMoneyByFuture(self, pReqQueryAccount: "CThostFtdcReqQueryAccountField", pRspInfo: "CThostFtdcRspInfoField", nRequestID: "int", bIsLast: "bool") -> "void":
+        r"""期货发起查询银行余额应答"""
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
+            print(f'OnRspQueryBankAccountMoneyByFuture failed: {pRspInfo.ErrorMsg}')
+            return
+        if pReqQueryAccount is not None:
+            print(f"OnRspQueryBankAccountMoneyByFuture:"
+                  f"TradeCode={pReqQueryAccount.TradeCode} "
+                  f"AccountID={pReqQueryAccount.AccountID} "
+                  f"BankID={pReqQueryAccount.BankID} "
+                  f"BankAccount={pReqQueryAccount.BankAccount} "
+                  f"CurrencyID={pReqQueryAccount.CurrencyID} "
+                  f"PlateSerial={pReqQueryAccount.PlateSerial} "
+                  f"TradeDate={pReqQueryAccount.TradeDate} "
+                  f"TradeTime={pReqQueryAccount.TradeTime} "
+                  )
+        if bIsLast == True:
+            print("Completed.")
 
 def print_commands():
     print("Commands:")
@@ -842,6 +1127,12 @@ def print_commands():
     print("{}: confirm settlement".format(command_SettlementInfoConfirm))
     print("{}: order insert".format(command_order_insert))
     print("{}: order cancel".format(command_order_cancel))
+    print("{}: money transfer to ctp".format(command_money_transfer_to_ctp))
+    print("{}: money transfer to bank".format(command_money_transfer_to_bank))
+    print("{}: query money transfer detail".format(command_query_money_transfer_detail))
+    print("{}: query bank account".format(command_query_bank_account))
+    print("{}: query account register".format(command_query_account_register))
+    print("{}: query contract bank".format(command_query_contract_bank))
     print("{}: quit".format(command_quit))
 
     print("please enter a command number.")
@@ -906,6 +1197,18 @@ if __name__ == '__main__':
     command_order_insert = str(i)
     i = i + 1
     command_order_cancel = str(i)
+    i = i + 1
+    command_money_transfer_to_ctp = str(i)
+    i = i + 1
+    command_money_transfer_to_bank = str(i)
+    i = i + 1
+    command_query_money_transfer_detail = str(i)
+    i = i + 1
+    command_query_bank_account = str(i)
+    i = i + 1
+    command_query_account_register = str(i)
+    i = i + 1
+    command_query_contract_bank = str(i)
 
     command_quit = 'q'
 
@@ -993,5 +1296,14 @@ if __name__ == '__main__':
             SessionID = input("SessionID:")
             OrderRef = input("OrderRef:")
             ctptelnet.OrderCancel(ExchangeID, InstrumentID, OrderSysID, FrontID, SessionID, OrderRef)
+        elif command == command_query_money_transfer_detail:
+            ctptelnet.QryTransferSerial()
+        elif command == command_query_bank_account:
+            Password = input("Password:")
+            ctptelnet.QueryBankAccount(Password)
+        elif command == command_query_account_register:
+            ctptelnet.QryAccountRegister()
+        elif command == command_query_contract_bank:
+            ctptelnet.QryContractBank()
         elif command == command_quit:
             break

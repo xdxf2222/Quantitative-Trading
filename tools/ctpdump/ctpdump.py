@@ -9,8 +9,8 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, asdict
-#from openctp_ctp import tdapi
-import thosttraderapi as tdapi
+from openctp_ctp import tdapi
+# import thosttraderapi as tdapi
 
 
 def adjust_price(price: float) -> float:
