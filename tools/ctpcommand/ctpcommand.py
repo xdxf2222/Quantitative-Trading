@@ -218,6 +218,46 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
         req.Password = Password
         self.api.ReqQueryBankAccountMoneyByFuture(req, 0)
 
+    def MoneyTransferToCTP(self, Amount, Password):
+        req = tdapi.CThostFtdcReqTransferField()
+        req.TradeCode = "202001"
+        req.AccountID = self.Accountregister.AccountID
+        req.BankID = self.Accountregister.BankID
+        req.BankBranchID = self.Accountregister.BankBranchID
+        req.BankAccount = self.Accountregister.BankAccount
+        req.BankAccType = self.Accountregister.BankAccType
+        req.BrokerID = self.Accountregister.BrokerID
+        req.BrokerBranchID = self.Accountregister.BrokerBranchID
+        req.IdCardType = self.Accountregister.IdCardType
+        req.IdentifiedCardNo = self.Accountregister.IdentifiedCardNo
+        req.CustType = self.Accountregister.CustType
+        req.VerifyCertNoFlag = tdapi.THOST_FTDC_YNI_No
+        req.SecuPwdFlag = tdapi.THOST_FTDC_BPWDF_BlankCheck
+        req.TradeAmount = Amount
+        req.CurrencyID = self.Accountregister.CurrencyID
+        req.Password = Password
+        self.api.ReqFromBankToFutureByFuture(req, 0)
+
+    def MoneyTransferToBank(self, Amount, Password):
+        req = tdapi.CThostFtdcReqTransferField()
+        req.TradeCode = "202002"
+        req.AccountID = self.Accountregister.AccountID
+        req.BankID = self.Accountregister.BankID
+        req.BankBranchID = self.Accountregister.BankBranchID
+        req.BankAccount = self.Accountregister.BankAccount
+        req.BankAccType = self.Accountregister.BankAccType
+        req.BrokerID = self.Accountregister.BrokerID
+        req.BrokerBranchID = self.Accountregister.BrokerBranchID
+        req.IdCardType = self.Accountregister.IdCardType
+        req.IdentifiedCardNo = self.Accountregister.IdentifiedCardNo
+        req.CustType = self.Accountregister.CustType
+        req.VerifyCertNoFlag = tdapi.THOST_FTDC_YNI_No
+        req.SecuPwdFlag = tdapi.THOST_FTDC_BPWDF_BlankCheck
+        req.TradeAmount = Amount
+        req.CurrencyID = self.Accountregister.CurrencyID
+        req.Password = Password
+        self.api.ReqFromFutureToBankByFuture(req, 0)
+
     def OnFrontConnected(self) -> "void":
         print("OnFrontConnected")
 
@@ -249,7 +289,7 @@ class CTPCommand(tdapi.CThostFtdcTraderSpi):
         req.BrokerID = self.broker
         req.UserID = self.user
         req.Password = self.password
-        req.UserProductInfo = "ctptelnet"
+        req.UserProductInfo = "openctp"
         self.api.ReqUserLogin(req, 0)
 
     def OnRspUserLogin(self, pRspUserLogin: 'CThostFtdcRspUserLoginField', pRspInfo: 'CThostFtdcRspInfoField',
@@ -1153,8 +1193,8 @@ if __name__ == '__main__':
     password = sys.argv[4]
     appid = sys.argv[5]
     authcode = sys.argv[6]
-    ctptelnet = CTPCommand(host, broker, user, password, appid, authcode)
-    ctptelnet.Run()
+    ctpcommand = CTPCommand(host, broker, user, password, appid, authcode)
+    ctpcommand.Run()
 
     # wait for login ok.
     semaphore.acquire()
@@ -1219,55 +1259,55 @@ if __name__ == '__main__':
             ExchangeID = input("ExchangeID: (Default:All)")
             ProductID = input("ProductID: (Default:All)")
             InstrumentID = input("InstrumentID: (Default:All)")
-            ctptelnet.QryInstrument(ExchangeID, ProductID, InstrumentID)
+            ctpcommand.QryInstrument(ExchangeID, ProductID, InstrumentID)
         elif command == command_query_exchange:
-            ctptelnet.QryExchange()
+            ctpcommand.QryExchange()
         elif command == command_query_product:
             ExchangeID = input("ExchangeID: (Default:All)")
             ProductID = input("ProductID: (Default:All)")
-            ctptelnet.QryProduct(ExchangeID, ProductID)
+            ctpcommand.QryProduct(ExchangeID, ProductID)
         elif command == command_query_position:
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryPosition(InstrumentID)
+            ctpcommand.QryPosition(InstrumentID)
         elif command == command_query_position_detail:
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryPositionDetail(InstrumentID)
+            ctpcommand.QryPositionDetail(InstrumentID)
         elif command == command_query_order:
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryOrder(InstrumentID)
+            ctpcommand.QryOrder(InstrumentID)
         elif command == command_query_trade:
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryTrade(InstrumentID)
+            ctpcommand.QryTrade(InstrumentID)
         elif command == command_query_price:
             ExchangeID = input("ExchangeID: (Default:All)")
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryPrice(ExchangeID, InstrumentID)
+            ctpcommand.QryPrice(ExchangeID, InstrumentID)
         elif command == command_query_account:
-            ctptelnet.QryAccount()
+            ctpcommand.QryAccount()
         elif command == command_query_CommissionRate:
             ExchangeID = input("ExchangeID: (Default:All)")
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryCommissionRate(ExchangeID, InstrumentID)
+            ctpcommand.QryCommissionRate(ExchangeID, InstrumentID)
         elif command == command_query_MarginRate:
             ExchangeID = input("ExchangeID: (Default:All)")
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryMarginRate(ExchangeID, InstrumentID)
+            ctpcommand.QryMarginRate(ExchangeID, InstrumentID)
         elif command == command_query_OrderCommRate:
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryOrderCommRate(InstrumentID)
+            ctpcommand.QryOrderCommRate(InstrumentID)
         elif command == command_query_OptionInstrCommRate:
             ExchangeID = input("ExchangeID: (Default:All)")
             InstrumentID = input("InstrumentID:(Default:All)")
-            ctptelnet.QryOptionInstrCommRate(ExchangeID, InstrumentID)
+            ctpcommand.QryOptionInstrCommRate(ExchangeID, InstrumentID)
         elif command == command_query_investor:
-            ctptelnet.QryInvestor()
+            ctpcommand.QryInvestor()
         elif command == command_query_tradingcode:
-            ctptelnet.QryTradingCode()
+            ctpcommand.QryTradingCode()
         elif command == command_query_settlement:
             TradingDay = input("TradingDay:(Default:All)")
-            ctptelnet.QrySettlementInfo(TradingDay)
+            ctpcommand.QrySettlementInfo(TradingDay)
         elif command == command_SettlementInfoConfirm:
-            ctptelnet.ConfirmSettlementInfo()
+            ctpcommand.ConfirmSettlementInfo()
         elif command == command_order_insert:
             ExchangeID = input("ExchangeID:")
             InstrumentID = input("InstrumentID:")
@@ -1287,7 +1327,7 @@ if __name__ == '__main__':
             MinVolume = input("MinVolume: (Default:1)")
             if MinVolume == "":
                 MinVolume = "1"
-            ctptelnet.OrderInsert(ExchangeID, InstrumentID, Direction, Offset, PriceType, Price, Volume, TimeCondition, VolumeCondition, MinVolume)
+            ctpcommand.OrderInsert(ExchangeID, InstrumentID, Direction, Offset, PriceType, Price, Volume, TimeCondition, VolumeCondition, MinVolume)
         elif command == command_order_cancel:
             ExchangeID = input("ExchangeID:")
             InstrumentID = input("InstrumentID:")
@@ -1295,15 +1335,29 @@ if __name__ == '__main__':
             FrontID = input("FrontID:")
             SessionID = input("SessionID:")
             OrderRef = input("OrderRef:")
-            ctptelnet.OrderCancel(ExchangeID, InstrumentID, OrderSysID, FrontID, SessionID, OrderRef)
+            ctpcommand.OrderCancel(ExchangeID, InstrumentID, OrderSysID, FrontID, SessionID, OrderRef)
         elif command == command_query_money_transfer_detail:
-            ctptelnet.QryTransferSerial()
+            ctpcommand.QryTransferSerial()
         elif command == command_query_bank_account:
             Password = input("Password:")
-            ctptelnet.QueryBankAccount(Password)
+            ctpcommand.QueryBankAccount(Password)
         elif command == command_query_account_register:
-            ctptelnet.QryAccountRegister()
+            ctpcommand.QryAccountRegister()
         elif command == command_query_contract_bank:
-            ctptelnet.QryContractBank()
+            ctpcommand.QryContractBank()
+        elif command == command_money_transfer_to_ctp:
+            Password = input("Password:")
+            Amount = input("Amount:")
+            if Amount == "":
+                print("Invalid Amount.")
+                continue
+            ctpcommand.MoneyTransferToCTP(float(Amount), Password)
+        elif command == command_money_transfer_to_bank:
+            Password = input("Password:")
+            Amount = input("Amount:")
+            if Amount == "":
+                print("Invalid Amount.")
+                continue
+            ctpcommand.MoneyTransferToBank(float(Amount), Password)
         elif command == command_quit:
             break
