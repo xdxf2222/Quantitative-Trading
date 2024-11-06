@@ -41,6 +41,7 @@ class CTdClient(api.CThostFtdcTraderSpi):
         self.__reqId: int = 0
         self.__ready: bool = False
         self.__queue: queue.Queue = queue.Queue()
+        self.is_login = None
 
     @property
     def reqId(self) -> int:
@@ -57,8 +58,8 @@ class CTdClient(api.CThostFtdcTraderSpi):
         self.tdapi.SubscribePublicTopic(api.THOST_TERT_QUICK)
         self.tdapi.RegisterFront(self.front)
         self.tdapi.Init()
-        while not self.__ready:
-            time.sleep(0.2)
+        # while not self.__ready:
+         #   time.sleep(0.2)
 
     def OnFrontConnected(self):
         """called when connect success"""
@@ -80,7 +81,7 @@ class CTdClient(api.CThostFtdcTraderSpi):
     def OnRspAuthenticate(self, pRspAuthenticateField: api.CThostFtdcRspAuthenticateField,
                           pRspInfo: api.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
         """called when authenticate success"""
-        if pRspInfo is not None:
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
             _print(f"authenticate failed, ErrorID: {pRspInfo.ErrorID}, ErrorMsg: {pRspInfo.ErrorMsg}")
 
         if pRspInfo is None or pRspInfo.ErrorID == 0:
@@ -99,14 +100,16 @@ class CTdClient(api.CThostFtdcTraderSpi):
     def OnRspUserLogin(self, pRspUserLogin: api.CThostFtdcRspUserLoginField, pRspInfo: api.CThostFtdcRspInfoField,
                        nRequestID: int, bIsLast: bool):
         """called when login responds"""
-        if pRspInfo is not None:
+        if pRspInfo is not None and pRspInfo.ErrorID != 0:
             _print(f"login failed, ErrorID: {pRspInfo.ErrorID}, ErrorMsg: {pRspInfo.ErrorMsg}")
 
         if pRspInfo is None or pRspInfo.ErrorID == 0:
             self.__ready = True
             self.__today = pRspUserLogin.TradingDay
+            self.is_login = True
         else:
-            exit(1)
+            self.is_login = False
+
 
     def querySettlementInfo(self, tradingDay: str) -> str:
         _print(f"query settlement {self.userConfig}")
@@ -116,12 +119,12 @@ class CTdClient(api.CThostFtdcTraderSpi):
         req.InvestorID = self.userConfig.userId
         self.tdapi.ReqQrySettlementInfo(req, self.reqId)
 
-        content: str = ""
+        content: bytes = b""
         last = False
         while not last:
             chunk, last = self.__queue.get()
             content = content + chunk
-        return content
+        return content.decode('gbk')
 
     def OnRspQrySettlementInfo(self, pSettlementInfo: api.CThostFtdcSettlementInfoField,
                                pRspInfo: api.CThostFtdcRspInfoField, nRequestID: int, bIsLast: bool):
@@ -129,8 +132,7 @@ class CTdClient(api.CThostFtdcTraderSpi):
             _print(f"query settlement failed, ErrorID: {pRspInfo.ErrorID}, ErrorMsg: {pRspInfo.ErrorMsg}")
 
         if pSettlementInfo is not None:
-            _print(f"content: {pSettlementInfo.Content}")
-            self.__queue.put_nowait((str(pSettlementInfo.Content), bIsLast))
+            self.__queue.put_nowait((bytes(pSettlementInfo.Content), bIsLast))
         else:
             _print(f"empty settlement content, last={bIsLast}")
 
@@ -553,7 +555,15 @@ if __name__ == "__main__":
         today: datetime.datetime = datetime.datetime.now()
         yesterday: datetime.datetime = today - datetime.timedelta(days=1)
         args.date = yesterday.strftime("%Y%m%d")
-    settlementInfoText = client.querySettlementInfo(args.date)
+
+    while True:
+        if client.is_login == False:
+            exit(-1)
+        elif client.is_login == True:
+            settlementInfoText = client.querySettlementInfo(args.date)
+            break
+        else:
+            time.sleep(0.2)
 
     if args.raw:
         print(settlementInfoText)
